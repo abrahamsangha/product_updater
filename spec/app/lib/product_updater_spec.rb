@@ -146,12 +146,12 @@ RSpec.describe ProductUpdater do
 
     context 'and a different name' do
       let(:args) { { external_product_id: 234567,
-                   name: "Color TV",
+                   name: 'Color TV',
                    price: 4377 } }
       let(:response) do [{
           'id' => 234567,
           'name' => 'Black & White TV',
-          'price' => '$43.77',
+          'price' => '$34.88',
           'category' =>  'electronics',
           'discontinued' => true
         }]
@@ -164,6 +164,10 @@ RSpec.describe ProductUpdater do
       it 'logs the mismatch' do
         expect(Rails.logger).to receive(:info).with /mismatch/
         updater.execute
+      end
+
+      it 'does not update the price' do
+        expect(product_by_name('Color TV').price).to eq 4377
       end
 
       it 'does not create a new Product' do

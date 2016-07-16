@@ -23,6 +23,7 @@ gem 'jbuilder', '~> 2.0'
 # bundle exec rake doc:rails generates the API under doc/api.
 gem 'sdoc', '~> 0.4.0', group: :doc
 
+# helpful interface to make HTTP requests
 gem 'httparty'
 
 # Use ActiveModel has_secure_password
@@ -35,9 +36,13 @@ gem 'httparty'
 # gem 'capistrano-rails', group: :development
 
 group :development, :test do
+  # convenient way to set environment variables
   gem 'dotenv-rails'
+  # useful repl and debugger
   gem 'pry-byebug'
+  # nice testing syntax
   gem 'rspec-rails'
+  # nice testing syntax
   gem 'shoulda-matchers'
 end
 
@@ -47,11 +52,14 @@ group :development do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+  # useful repl and debugger
   gem 'pry-rails'
 end
 
 group :test do
+  # ensures the database is wiped after specs run
   gem 'database_cleaner'
+  # allows the stubbing of http requests
   gem 'webmock'
 end
 

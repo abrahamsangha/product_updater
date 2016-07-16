@@ -7,7 +7,6 @@ RSpec.describe ProductUpdater do
   end
   let(:product_api) { instance_double('ProductApi') }
   let(:past_price_record) { PastPriceRecord.find_by(price: args[:price]) }
-  let(:product) { Product.find_by(name: "Black & White TV") }
   before do
     allow(product_api_class).to receive(:default).and_return(product_api)
     allow(product_api).to receive(:product_records).and_return(response)
@@ -73,7 +72,7 @@ RSpec.describe ProductUpdater do
         end
 
         it 'updates the price for the Product record' do
-          expect(product.price).to eq 4377
+          expect(product_by_name('Black & White TV').price).to eq 4377
         end
       end
 

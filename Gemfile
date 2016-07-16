@@ -38,6 +38,7 @@ group :development, :test do
   gem 'dotenv-rails'
   gem 'pry-byebug'
   gem 'rspec-rails'
+  gem 'shoulda-matchers'
 end
 
 group :development do

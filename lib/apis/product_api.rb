@@ -22,4 +22,8 @@ class ProductApi
   def find_all
     self.class.get(product_api_root_uri, { query: options })
   end
+
+  def product_records
+    JSON.parse(find_all)['productRecords']
+  end
 end

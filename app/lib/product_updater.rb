@@ -8,7 +8,8 @@ module ProductUpdater
       matching_product = Product.find_by(external_product_id: record['id'])
       if matching_product.nil?
         if not_discontinued?(record)
-          Product.create(create_args(record))
+          product = Product.create(create_args(record))
+          log_new_product(record['id'], product.id)
         end
       elsif same_name?(matching_product, record)
         if different_price?(matching_product.price, price(record['price']))
@@ -63,12 +64,18 @@ module ProductUpdater
   end
 
   def new_product_records
-    @new_product_records ||= ProductApi.default.product_records
+    ProductApi.default.product_records
+  end
+
+  def log_new_product(external_product_id, id)
+    Rails.logger.info "API response contained new product with " \
+                      "external_product_id: #{external_product_id}"
+    Rails.logger.info "Created new product with id: #{id}"
   end
 
   def log_mismatch(id)
-    Rails.logger.info "Product name mismatch between api response and our record for" \
-                 "Product id: #{id}"
+    Rails.logger.info "Product name mismatch between api response and our record for " \
+                      "Product id: #{id}"
   end
 
 end

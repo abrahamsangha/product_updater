@@ -17,7 +17,6 @@ RSpec.describe ProductUpdater do
   end
 
   context 'with a non-matching' do
-    before { updater.execute }
     context 'and non-discontinued record' do
       let(:response) do [{
           'id' => 234567,
@@ -28,7 +27,15 @@ RSpec.describe ProductUpdater do
         }]
       end
       it 'creates a new Product' do
+        expect(Product.count).to eq 0
+        updater.execute
         expect(product_by_name('Black & White TV')).not_to be_nil
+        expect(Product.count).to eq 1
+      end
+
+      it 'logs the new product' do
+        expect(Rails.logger).to receive(:info).with(/new/).twice
+        updater.execute
       end
     end
 
@@ -42,7 +49,15 @@ RSpec.describe ProductUpdater do
         }]
       end
       it 'does not create a new Product' do
+        expect(Product.count).to eq 0
+        updater.execute
         expect(product_by_name('Replicator')).to be_nil
+        expect(Product.count).to eq 0
+      end
+
+      it 'does not log a new product' do
+        expect(Rails.logger).not_to receive(:info).with /new/
+        updater.execute
       end
     end
   end
@@ -50,29 +65,58 @@ RSpec.describe ProductUpdater do
   context 'with a matching record' do
     context 'and the same name' do
       context 'and a different price' do
-        let(:args) { { external_product_id: 234567,
-                       name: "Black & White TV",
-                       price: 4000 } }
-        let(:response) do [{
-            'id' => 234567,
-            'name' => 'Black & White TV',
-            'price' => '$43.77',
-            'category' =>  'electronics',
-            'discontinued' => true
-          }]
+        context 'and discontinued' do
+          let(:args) { { external_product_id: 234567,
+                         name: "Black & White TV",
+                         price: 4000 } }
+          let(:response) do [{
+              'id' => 234567,
+              'name' => 'Black & White TV',
+              'price' => '$43.77',
+              'category' =>  'electronics',
+              'discontinued' => true
+            }]
+          end
+
+          before do
+            Product.create!(args)
+            updater.execute
+          end
+
+          it 'creates a PastPriceRecord' do
+            expect(past_price_record).not_to be_nil
+          end
+
+          it 'updates the price for the Product record' do
+            expect(product_by_name('Black & White TV').price).to eq 4377
+          end
         end
 
-        before do
-          Product.create!(args)
-          updater.execute
-        end
+        context 'and not discontinued' do
+          let(:args) { { external_product_id: 234567,
+                         name: "Black & White TV",
+                         price: 4000 } }
+          let(:response) do [{
+              'id' => 234567,
+              'name' => 'Black & White TV',
+              'price' => '$43.77',
+              'category' =>  'electronics',
+              'discontinued' => false
+            }]
+          end
 
-        it 'creates a PastPriceRecord' do
-          expect(past_price_record).not_to be_nil
-        end
+          before do
+            Product.create!(args)
+            updater.execute
+          end
 
-        it 'updates the price for the Product record' do
-          expect(product_by_name('Black & White TV').price).to eq 4377
+          it 'creates a PastPriceRecord' do
+            expect(past_price_record).not_to be_nil
+          end
+
+          it 'updates the price for the Product record' do
+            expect(product_by_name('Black & White TV').price).to eq 4377
+          end
         end
       end
 
@@ -95,6 +139,7 @@ RSpec.describe ProductUpdater do
 
         it 'does not create a PastPriceRecord' do
           expect(past_price_record).to be_nil
+          expect(PastPriceRecord.count).to eq 0
         end
       end
     end
@@ -117,8 +162,19 @@ RSpec.describe ProductUpdater do
       end
 
       it 'logs the mismatch' do
-        expect(Rails.logger).to receive(:info)
+        expect(Rails.logger).to receive(:info).with /mismatch/
         updater.execute
+      end
+
+      it 'does not create a new Product' do
+        expect(Product.count).to eq 1
+        updater.execute
+        expect(Product.count).to eq 1
+      end
+
+      it 'does not create a PastPriceRecord' do
+        expect(past_price_record).to be_nil
+        expect(PastPriceRecord.count).to eq 0
       end
     end
 

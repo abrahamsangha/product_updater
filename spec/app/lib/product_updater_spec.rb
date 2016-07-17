@@ -67,12 +67,12 @@ RSpec.describe ProductUpdater do
       context 'and a different price' do
         context 'and discontinued' do
           let(:args) { { external_product_id: 234567,
-                         name: "Black & White TV",
-                         price: 4000 } }
+                         name: 'Discman',
+                         price: 1000 } }
           let(:response) do [{
               'id' => 234567,
-              'name' => 'Black & White TV',
-              'price' => '$43.77',
+              'name' => 'Discman',
+              'price' => '$15.00',
               'category' =>  'electronics',
               'discontinued' => true
             }]
@@ -87,19 +87,23 @@ RSpec.describe ProductUpdater do
             expect(past_price_record).not_to be_nil
           end
 
+          it 'saves the correct percentage change' do
+            expect(past_price_record.percentage_change).to eq 50.0
+          end
+
           it 'updates the price for the Product record' do
-            expect(product_by_name('Black & White TV').price).to eq 4377
+            expect(product_by_name('Discman').price).to eq 1500
           end
         end
 
         context 'and not discontinued' do
-          let(:args) { { external_product_id: 234567,
-                         name: "Black & White TV",
-                         price: 4000 } }
+          let(:args) { { external_product_id: 44444,
+                         name: 'Walkman',
+                         price: 200 } }
           let(:response) do [{
-              'id' => 234567,
-              'name' => 'Black & White TV',
-              'price' => '$43.77',
+              'id' => 44444,
+              'name' => 'Walkman',
+              'price' => '$1.00',
               'category' =>  'electronics',
               'discontinued' => false
             }]
@@ -114,8 +118,12 @@ RSpec.describe ProductUpdater do
             expect(past_price_record).not_to be_nil
           end
 
+          it 'saves the correct percentage change' do
+            expect(past_price_record.percentage_change).to eq -50.0
+          end
+
           it 'updates the price for the Product record' do
-            expect(product_by_name('Black & White TV').price).to eq 4377
+            expect(product_by_name('Walkman').price).to eq 100
           end
         end
       end

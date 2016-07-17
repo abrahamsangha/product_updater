@@ -24,6 +24,8 @@ module ProductUpdater
     end
   end
 
+  private
+
   def create_args(record)
     record.except('id','category', 'discontinued', 'price').
       merge(external_product_id: record['id'],

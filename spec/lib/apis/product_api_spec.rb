@@ -26,4 +26,32 @@ RSpec.describe ProductApi do
     end
   end
 
+  describe '#product_records' do
+    let(:product_list) do
+      [
+        {
+          'id' => 123456,
+          'name' => 'Nice Chair',
+          'price' => '$30.25',
+          'category' => 'home-furnishings',
+          'discontinued' => false
+        },
+        {
+          'id' => 234567,
+          'name' => 'Black & White TV',
+          'price' => '$43.77',
+          'category' =>  'electronics',
+          'discontinued' => true
+        }
+      ]
+    end
+    before do
+      allow(api).to receive(:find_all).and_return(PRODUCT_API_RESPONSE)
+    end
+
+    it 'returns a list of product records' do
+      expect(api.product_records).to eq product_list
+    end
+  end
+
 end
